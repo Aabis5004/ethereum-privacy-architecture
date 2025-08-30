@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum Privacy Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0b0d;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            opacity: 0;
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #8892b0;
+            font-weight: 400;
+        }
+
+        .flow-section {
+            margin-bottom: 80px;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .flow-section:nth-child(2) { animation-delay: 0.2s; }
+        .flow-section:nth-child(3) { animation-delay: 0.4s; }
+        .flow-section:nth-child(4) { animation-delay: 0.6s; }
+        .flow-section:nth-child(5) { animation-delay: 0.8s; }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #ccd6f6;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .card-content {
+            color: #8892b0;
+            font-size: 14px;
+        }
+
+        .card-list {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .card-list li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #8892b0;
+            font-size: 14px;
+        }
+
+        .card-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .flow-diagram {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flow-boxes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .flow-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .flow-box:nth-child(1) { animation-delay: 1s; }
+        .flow-box:nth-child(2) { animation-delay: 1.3s; }
+        .flow-box:nth-child(3) { animation-delay: 1.6s; }
+
+        .flow-box.highlight-purple {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .flow-box.highlight-green {
+            background: rgba(72, 187, 120, 0.1);
+            border-color: rgba(72, 187, 120, 0.3);
+        }
+
+        .flow-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(102, 126, 234, 0.1);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            color: #8892b0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-good {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .status-bad {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .tech-stack {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tech-badge {
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            font-size: 14px;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .tech-badge:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .animated-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            animation: lineMove 3s infinite;
+            margin: 40px 0;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.1); }
+        }
+
+        @keyframes lineMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 32px; }
+            .subtitle { font-size: 16px; }
+            .section-title { font-size: 20px; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .flow-boxes { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ethereum Privacy Architecture</h1>
+            <p class="subtitle">Enterprise-Grade Privacy Solutions on Ethereum</p>
+        </header>
+
+        <section class="flow-section">
+            <h2 class="section-title">The Current Problem</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <h3 class="card-header">Transparency Issues</h3>
+                    <p class="card-content">Every transaction on Ethereum is completely visible to anyone</p>
+                    <ul class="card-list">
+                        <li>Transaction amounts exposed</li>
+                        <li>Business relationships visible</li>
+                        <li>Payment patterns trackable</li>
+                        <li>Competitive intelligence leaked</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="card-header">Enterprise Concerns</h3>
+                    <p class="card-content">Major corporations cannot adopt blockchain without privacy</p>
+                    <ul class="card-list">
+                        <li>Trade secrets at risk</li>
+                        <li>Supply chain exposure</li>
+                        <li>Pricing information leaked</li>
+                        <li>Strategic moves visible</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="card-header">Real Impact</h3>
+                    <p class="card-content">Actual business consequences of transparent blockchains</p>
+                    <ul class="card-list">
+                        <li>Competitors undercut deals</li>
+                        <li>Suppliers get poached</li>
+                        <li>Market manipulation risks</li>
+                        <li>Regulatory complications</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="animated-line"></div>
+
+        <section class="flow-section">
+            <h2 class="section-title">Why Ethereum Remains Transparent</h2>
+            <div class="flow-diagram">
+                <div class="flow-boxes">
+                    <div class="flow-box highlight-purple">
+                        <h3 class="card-header">Security First</h3>
+                        <p class="card-content">Simplicity equals security. Privacy adds complexity and attack vectors.</p>
+                    </div>
+                    <div class="flow-box highlight-purple">
+                        <h3 class="card-header">Gas Economics</h3>
+                        <p class="card-content">ZK proofs would increase transaction costs by 100x or more.</p>
+                    </div>
+                    <div class="flow-box highlight-purple">
+                        <h3 class="card-header">Global Compliance</h3>
+                        <p class="card-content">Transparency keeps Ethereum legally accessible worldwide.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="flow-section">
+            <h2 class="section-title">The Layer 2 Solution: Aztec</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <h3 class="card-header">Architecture Overview</h3>
+                    <p class="card-content">Aztec operates as a privacy layer on top of Ethereum</p>
+                    <div class="tech-stack">
+                        <span class="tech-badge">Zero-Knowledge Proofs</span>
+                        <span class="tech-badge">Client-Side Encryption</span>
+                        <span class="tech-badge">Noir Language</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="card-header">How It Works</h3>
+                    <p class="card-content">Two-part execution model for maximum privacy</p>
+                    <ul class="card-list">
+                        <li>Private execution on user device (PXE)</li>
+                        <li>Public verification on network (AVM)</li>
+                        <li>One-way privacy flow</li>
+                        <li>Selective disclosure options</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="card-header">Key Features</h3>
+                    <p class="card-content">Enterprise-ready privacy infrastructure</p>
+                    <ul class="card-list">
+                        <li>Account abstraction by default</li>
+                        <li>Programmable privacy levels</li>
+                        <li>Compliance-friendly design</li>
+                        <li>Inherits Ethereum security</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="animated-line"></div>
+
+        <section class="flow-section">
+            <h2 class="section-title">Transaction Flow Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Current Ethereum</th>
+                        <th>With Aztec Layer 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Transaction Amount</td>
+                        <td><span class="status-badge status-bad">Fully Visible</span></td>
+                        <td><span class="status-badge status-good">Encrypted</span></td>
+                    </tr>
+                    <tr>
+                        <td>Recipient Identity</td>
+                        <td><span class="status-badge status-bad">Public Address</span></td>
+                        <td><span class="status-badge status-good">Hidden</span></td>
+                    </tr>
+                    <tr>
+                        <td>Business Logic</td>
+                        <td><span class="status-badge status-bad">Exposed</span></td>
+                        <td><span class="status-badge status-good">Private</span></td>
+                    </tr>
+                    <tr>
+                        <td>Compliance</td>
+                        <td><span class="status-badge status-good">Built-in</span></td>
+                        <td><span class="status-badge status-good">Selective Disclosure</span></td>
+                    </tr>
+                    <tr>
+                        <td>Gas Costs</td>
+                        <td><span class="status-badge status-good">Standard</span></td>
+                        <td><span class="status-badge status-good">Optimized on L2</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="flow-section">
+            <h2 class="section-title">Implementation Path</h2>
+            <div class="flow-diagram">
+                <div class="flow-boxes">
+                    <div class="flow-box highlight-green">
+                        <h3 class="card-header">Phase 1</h3>
+                        <p class="card-content">Deploy smart contracts on Aztec testnet</p>
+                    </div>
+                    <div class="flow-box highlight-green">
+                        <h3 class="card-header">Phase 2</h3>
+                        <p class="card-content">Integrate privacy features using Noir</p>
+                    </div>
+                    <div class="flow-box highlight-green">
+                        <h3 class="card-header">Phase 3</h3>
+                        <p class="card-content">Production deployment with compliance</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="flow-section">
+            <h2 class="section-title">Technology Stack</h2>
+            <div class="tech-stack">
+                <span class="tech-badge">Ethereum L1</span>
+                <span class="tech-badge">Aztec L2</span>
+                <span class="tech-badge">Zero-Knowledge Proofs</span>
+                <span class="tech-badge">Noir Programming</span>
+                <span class="tech-badge">Account Abstraction</span>
+                <span class="tech-badge">Client-Side Encryption</span>
+                <span class="tech-badge">SNARK Circuits</span>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
